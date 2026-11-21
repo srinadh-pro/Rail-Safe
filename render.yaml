@@ -18,10 +18,10 @@ services:
         - render.yaml
 
     envVars:
-      # Required: paste the Aiven JDBC URL / credentials from your secret store.
-      # DB_URL must be the full jdbc:mysql://... URL (not the Aiven mysql:// URI).
-      - key: DB_URL
-        sync: false
+      # DB_URL is deliberately not prompted: application.properties already has
+      # the full jdbc:mysql://... URL for this Aiven instance, including VERIFY_CA
+      # and the bundled truststore. Set DB_URL only to override that endpoint, and
+      # never paste Aiven's short mysql://... service URI (the MySQL driver rejects it).
       - key: DB_USERNAME
         value: avnadmin
       - key: DB_PASSWORD
