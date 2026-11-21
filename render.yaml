@@ -18,10 +18,10 @@ services:
         - render.yaml
 
     envVars:
-      # Supply the FULL JDBC URL here. Aiven's short mysql://user:pass@host:port/db
-      # URI is rejected by the MySQL driver ("claims to not accept jdbcUrl").
-      # Keep credentials out of the URL: they come from DB_USERNAME / DB_PASSWORD,
-      # and the truststore password from AIVEN_TRUSTSTORE_PASSWORD.
+      # Accepts either the full jdbc:mysql://... URL or the short mysql://... URI
+      # from Aiven; the app converts the short form at startup. Dashboard values
+      # for DB_USERNAME / DB_PASSWORD take precedence over credentials in the URI,
+      # and the truststore password comes from AIVEN_TRUSTSTORE_PASSWORD.
       - key: DB_URL
         sync: false
       - key: DB_USERNAME

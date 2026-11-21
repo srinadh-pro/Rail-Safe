@@ -51,11 +51,13 @@ Do **not** set `RAILSAFE_SERVER_ADDRESS=127.0.0.1` on Render.
    | `RAILSAFE_SUPER_ADMIN_EMAIL` | Bootstrap SUPER_ADMIN email |
    | `RAILSAFE_SUPER_ADMIN_PASSWORD` | Strong bootstrap SUPER_ADMIN password |
 
-   `DB_URL` **must** be a full `jdbc:mysql://...` URL. Pasting the short
-   `mysql://user:pass@host:port/db` URI from Aiven fails with "Driver
-   com.mysql.cj.jdbc.Driver claims to not accept jdbcUrl". Keep credentials out
-   of the URL: `DB_USERNAME`/`DB_PASSWORD` carry them, and the truststore password
-   is passed separately as a driver property via `AIVEN_TRUSTSTORE_PASSWORD`.
+   `DB_URL` may be either a full `jdbc:mysql://...` URL or the short
+   `mysql://user:pass@host:port/db` URI copied from Aiven. The app normalises the
+   short form at startup (including `ssl-mode=REQUIRED` → `VERIFY_CA`) before the
+   MySQL driver sees it, so both work. Credentials found in the short URI are
+   kept out of the JDBC URL; `DB_USERNAME`/`DB_PASSWORD` from the dashboard take
+   precedence, and the truststore password is passed as a driver property via
+   `AIVEN_TRUSTSTORE_PASSWORD`.
 
 6. Keep the non-secret values from the Blueprint:
    - `RAILSAFE_FORWARD_HEADERS_STRATEGY=framework`
