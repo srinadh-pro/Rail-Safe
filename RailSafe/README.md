@@ -520,7 +520,7 @@ Git deploys:
 
 - Vercel publishes `src/main/resources/static` and rebuilds the React `/live/`
   bundle with `npm ci && npm run build` from `frontend/`.
-- Render builds `RailSafe/Dockerfile` and runs the Spring Boot API. It uses the
+- Render builds the root `Dockerfile` and runs the Spring Boot API. It uses the
   injected `PORT` automatically; do **not** set `RAILSAFE_SERVER_ADDRESS` there.
 - Vercel proxies `/api/*` to Render via the required `BACKEND_URL` environment
   variable, so cookies, CSRF and SSE remain same-origin. No CORS changes are needed.

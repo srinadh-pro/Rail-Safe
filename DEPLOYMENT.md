@@ -4,7 +4,7 @@ This repository is configured for Git-based deployment:
 
 - **Vercel** publishes the existing static UI from `RailSafe/src/main/resources/static`
   and rebuilds the React `/live/` bundle from `RailSafe/frontend`.
-- **Render** builds and runs the Spring Boot API from `RailSafe/Dockerfile`.
+- **Render** builds and runs the Spring Boot API from the root `Dockerfile`.
 - Vercel proxies `/api/*` to Render, so the browser sees one origin. This keeps
   `JSESSIONID`, the `XSRF-TOKEN` cookie, CSRF headers, login redirects and SSE
   working without CORS or `SameSite=None` changes.
@@ -19,7 +19,7 @@ No secrets are stored in Git. Set them in the Render and Vercel dashboards.
 |---|---|
 | `vercel.json` (repo root) | Vercel install/build commands, static output directory, `/api/*` proxy, `/live/` rewrite, API no-cache header |
 | `render.yaml` (repo root) | Render Blueprint for the Docker web service |
-| `RailSafe/Dockerfile` | Multi-stage Maven build + small JRE runtime image |
+| `Dockerfile` (repo root) | Multi-stage Maven build + small JRE runtime image |
 | `.dockerignore`, `.vercelignore` | Keep secrets, local data and build caches out of uploads |
 | `RailSafe/src/main/java/com/railsafe/controller/HealthController.java` | Public `GET /api/health` liveness probe |
 
@@ -147,7 +147,7 @@ npm run build
 If Docker is installed:
 
 ```powershell
-docker build -f RailSafe/Dockerfile -t railsafe-backend .
+docker build -f Dockerfile -t railsafe-backend .
 ```
 
 ---

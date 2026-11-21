@@ -1,5 +1,6 @@
 # Multi-stage build for Render (Render has no native Java runtime).
-# Build context is the Git repository root; see ../render.yaml.
+# Kept at the repository root because Render's default "Dockerfile Path" is
+# ./Dockerfile. This works for Blueprint services and manually created ones.
 
 FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /workspace/RailSafe

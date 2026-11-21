@@ -321,7 +321,7 @@ These demo shortcut values are historical examples only. The Aiven SUPER_ADMIN p
   `src/main/resources/static`, proxies `/api/*` to the Render service through the
   required `BACKEND_URL` environment variable, and rewrites `/live/` to the built
   React `index.html`. API rewrite caching is disabled.
-- Added root `render.yaml` and `RailSafe/Dockerfile`: one Docker web service,
+- Added root `render.yaml` and root `Dockerfile`: one Docker web service,
   multi-stage Maven build, JRE 17 runtime, public `/api/health` health check,
   `PORT` binding, forwarded headers, Secure cookies and HSTS. Secrets use
   `sync: false` and remain in the Render dashboard.

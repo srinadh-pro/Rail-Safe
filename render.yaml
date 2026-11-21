@@ -6,7 +6,7 @@ services:
   - type: web
     name: railsafe-backend
     runtime: docker
-    dockerfilePath: ./RailSafe/Dockerfile
+    dockerfilePath: ./Dockerfile
     dockerContext: .
     healthCheckPath: /api/health
     numInstances: 1
