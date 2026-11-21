@@ -1,0 +1,15 @@
+.git
+**/.git
+**/node_modules
+**/target
+**/data
+**/*.log
+.vercel
+
+RailSafe/deployment/railsafe.env.local
+RailSafe/frontend/dist
+RailSafe/.settings
+RailSafe/.vscode
+RailSafe/.classpath
+RailSafe/.project
+RailSafe/build-oracle.log

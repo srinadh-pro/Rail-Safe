@@ -510,7 +510,25 @@ Repeated failed sign-ins from one client are locked out after
 (default 15); further attempts return HTTP `429`. For public HTTPS deployment,
 see `deployment/nginx-railsafe.conf` and set `RAILSAFE_COOKIE_SECURE=true`,
 `RAILSAFE_HSTS_ENABLED=true`, `RAILSAFE_FORWARD_HEADERS_STRATEGY=framework` and
-`RAILSAFE_SERVER_ADDRESS=127.0.0.1` in `railsafe.env.local`.
+`RAILSAFE_SERVER_ADDRESS=127.0.0.1` in `railsafe.env.local` **only** for that local
+single-host nginx setup.
+
+### Vercel + Render (Git-based deployment)
+
+Root `vercel.json` and root `render.yaml` make this repository ready for automatic
+Git deploys:
+
+- Vercel publishes `src/main/resources/static` and rebuilds the React `/live/`
+  bundle with `npm ci && npm run build` from `frontend/`.
+- Render builds `RailSafe/Dockerfile` and runs the Spring Boot API. It uses the
+  injected `PORT` automatically; do **not** set `RAILSAFE_SERVER_ADDRESS` there.
+- Vercel proxies `/api/*` to Render via the required `BACKEND_URL` environment
+  variable, so cookies, CSRF and SSE remain same-origin. No CORS changes are needed.
+- `GET /api/health` is a public liveness probe used by Render's health check.
+
+See [`DEPLOYMENT.md`](../DEPLOYMENT.md) at the repository root for the full setup
+and verification runbook. Keep all secret values in the platform dashboards, never
+in Git.
 
 ---
 

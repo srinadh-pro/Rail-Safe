@@ -1,0 +1,50 @@
+# Render Blueprint for the RailSafe Spring Boot API.
+# Deploy from GitHub: New > Blueprint > srinadh-pro/Rail-Safe > main.
+# Secrets are prompted in the Render Dashboard (sync: false); never commit values.
+
+services:
+  - type: web
+    name: railsafe-backend
+    runtime: docker
+    dockerfilePath: ./RailSafe/Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    numInstances: 1
+    autoDeployTrigger: commit
+    plan: 0.5c-512mb
+    buildFilter:
+      paths:
+        - RailSafe/**
+        - render.yaml
+
+    envVars:
+      # Required: paste the Aiven JDBC URL / credentials from your secret store.
+      # DB_URL must be the full jdbc:mysql://... URL (not the Aiven mysql:// URI).
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        value: avnadmin
+      - key: DB_PASSWORD
+        sync: false
+      - key: AIVEN_TRUSTSTORE_PASSWORD
+        sync: false
+      - key: RAILSAFE_SUPER_ADMIN_EMAIL
+        sync: false
+      - key: RAILSAFE_SUPER_ADMIN_PASSWORD
+        sync: false
+
+      # HTTPS behind Vercel's proxy; do not set RAILSAFE_SERVER_ADDRESS here.
+      - key: RAILSAFE_FORWARD_HEADERS_STRATEGY
+        value: framework
+      - key: RAILSAFE_COOKIE_SECURE
+        value: "true"
+      - key: RAILSAFE_HSTS_ENABLED
+        value: "true"
+
+      # Keep the labelled simulation behaviour used by the existing UI.
+      - key: RAILSAFE_LIVE_MODE
+        value: simulation
+      - key: RAILSAFE_DEMO_ACCOUNTS_ENABLED
+        value: "false"
+      - key: RAILSAFE_DDL_AUTO
+        value: update

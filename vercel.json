@@ -1,0 +1,29 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "cd RailSafe/frontend && npm ci",
+  "buildCommand": "cd RailSafe/frontend && npm run build",
+  "outputDirectory": "RailSafe/src/main/resources/static",
+  "routes": [
+    {
+      "src": "^/api/(.*)$",
+      "dest": "${BACKEND_URL}/api/$1",
+      "env": ["BACKEND_URL"]
+    },
+    {
+      "src": "^/live/?$",
+      "dest": "/live/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/:path*",
+      "headers": [
+        {
+          "key": "x-vercel-enable-rewrite-caching",
+          "value": "0"
+        }
+      ]
+    }
+  ]
+}

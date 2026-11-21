@@ -1,0 +1,13 @@
+.git
+**/.git
+**/node_modules
+**/target
+**/data
+**/*.log
+.dockerignore
+
+RailSafe/deployment/railsafe.env.local
+RailSafe/frontend/dist
+RailSafe/.settings
+RailSafe/.vscode
+RailSafe/build-oracle.log

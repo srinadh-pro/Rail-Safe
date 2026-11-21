@@ -120,7 +120,8 @@ public class SecurityConfig {
                                 "/css/**", "/js/**", "/images/**", "/favicon.ico", "/favicon.svg", "/error")
                         .permitAll()
                         .requestMatchers("/api/auth/login", "/api/auth/staff-login", "/api/auth/register",
-                                "/api/auth/logout", "/api/auth/csrf", "/api/auth/demo-accounts").permitAll()
+                                "/api/auth/logout", "/api/auth/csrf", "/api/auth/demo-accounts",
+                                "/api/health").permitAll()
                         // Sensor webhook is authenticated by its shared secret, not a browser session.
                         .requestMatchers(HttpMethod.POST, "/api/live/sensor/**").permitAll()
                         // Super-admin account/system management is SUPER_ADMIN only (checked before generic pages).

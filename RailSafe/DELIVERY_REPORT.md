@@ -315,6 +315,24 @@ These demo shortcut values are historical examples only. The Aiven SUPER_ADMIN p
 
 ---
 
-## 8. Conclusion
+## 8. Vercel + Render deployment readiness
+
+- Added root `vercel.json`: Vercel installs/builds `frontend/`, publishes
+  `src/main/resources/static`, proxies `/api/*` to the Render service through the
+  required `BACKEND_URL` environment variable, and rewrites `/live/` to the built
+  React `index.html`. API rewrite caching is disabled.
+- Added root `render.yaml` and `RailSafe/Dockerfile`: one Docker web service,
+  multi-stage Maven build, JRE 17 runtime, public `/api/health` health check,
+  `PORT` binding, forwarded headers, Secure cookies and HSTS. Secrets use
+  `sync: false` and remain in the Render dashboard.
+- Added `.dockerignore`, `.vercelignore` and root `DEPLOYMENT.md`. The existing
+  static pages, element IDs, form names, root-relative API URLs, token CSRF flow,
+  sensor-webhook exemption, login lockout and labelled simulation UI are unchanged.
+- The browser continues to call one origin (Vercel), so no CORS, `SameSite=None`
+  or frontend API-base changes were introduced.
+
+---
+
+## 9. Conclusion
 
 The existing RailSafe application was extended in place with login-first four-role access, role-specific dashboards, strict live-data gating, visible staff/admin manual verification, dedicated gate-staff sign-in, large confirmed OPEN/CLOSE controls, assignment-scoped staff dashboards/history/SSE, fully audited SUPER_ADMIN overrides, a clearly labelled demo simulation board, 153 verified OSM crossing references, 30 checked train references, genuine OSRM alternate routing, deduplicated real-time notifications, staff/admin/Super Admin operations, comprehensive DB migrations, externalized and rotated secrets, token-based CSRF protection, HTTPS/secure-cookie/HSTS configuration, a TLS reverse-proxy sample, login lockout and a schema-validation override. Automated tests (25/25), static JS checks, frontend build, package build, 23 API/RBAC checks, 7 SSE checks and browser UI checks all passed. No simulation data was presented as genuine live railway information.
