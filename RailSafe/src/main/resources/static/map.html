@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="RailSafe gate map and route assistance. Reported and verified information, not live railway data.">
+    <title>Gate map &amp; routes – RailSafe</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div id="app-nav"></div>
+
+<main class="container py-4 py-lg-5">
+    <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-4">
+        <div>
+            <span class="small-label">Map &amp; route assistance</span>
+            <h1 class="h2 mb-1 mt-1">Know what has been reported on your way</h1>
+            <p class="text-muted-rs mb-0">
+                Coloured pins show the latest <strong>reported</strong> status. Route checks only flag
+                crossings within 150 m of a calculated OSRM route.
+            </p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <span class="badge-soft align-self-center"><i class="bi bi-exclamation-triangle me-1"></i>REPORTED DATA · NOT LIVE</span>
+            <button class="btn btn-outline-navy" id="refresh-gates" type="button">
+                <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+            </button>
+        </div>
+    </div>
+
+    <div id="route-alert" class="hidden mb-3"></div>
+
+    <div class="row g-4">
+        <div class="col-lg-5 col-xl-4">
+            <section class="rs-card mb-4">
+                <div class="rs-card-header">
+                    <div>
+                        <h2>Plan a route</h2>
+                        <p class="section-subtitle">Start and destination, then calculate alternatives.</p>
+                    </div>
+                    <span class="badge-soft">OSRM</span>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label" for="start-input">Start</label>
+                        <div class="input-group">
+                            <input class="form-control" id="start-input" type="text" autocomplete="off"
+                                   placeholder="Search a place or enter coordinates">
+                            <button class="btn btn-soft" id="search-start" type="button" title="Search place">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 mt-2">
+                            <button class="btn btn-sm btn-outline-navy" id="locate-start" type="button">
+                                <i class="bi bi-crosshair me-1"></i>My location
+                            </button>
+                            <button class="btn btn-sm btn-outline-navy" id="pick-start" type="button">
+                                <i class="bi bi-pin-map me-1"></i>Pick on map
+                            </button>
+                        </div>
+                        <div class="text-muted-rs mt-2" id="start-selected" style="font-size:.76rem;">Start not selected.</div>
+                        <div class="list-group mt-2 hidden" id="start-results"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="dest-input">Destination</label>
+                        <div class="input-group">
+                            <input class="form-control" id="dest-input" type="text" autocomplete="off"
+                                   placeholder="Search a place or enter coordinates">
+                            <button class="btn btn-soft" id="search-dest" type="button" title="Search place">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 mt-2">
+                            <button class="btn btn-sm btn-outline-navy" id="pick-dest" type="button">
+                                <i class="bi bi-pin-map me-1"></i>Pick on map
+                            </button>
+                            <button class="btn btn-sm btn-outline-navy" id="clear-route" type="button">
+                                <i class="bi bi-x-circle me-1"></i>Clear
+                            </button>
+                        </div>
+                        <div class="text-muted-rs mt-2" id="dest-selected" style="font-size:.76rem;">Destination not selected.</div>
+                        <div class="list-group mt-2 hidden" id="dest-results"></div>
+                    </div>
+
+                    <div id="map-pick-note" class="alert-rs alert-rs-info hidden mb-3"></div>
+
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary" id="plan-route" type="button">
+                            <i class="bi bi-sign-turn-right me-1"></i>Calculate routes
+                        </button>
+                        <button class="btn btn-outline-navy" id="load-demo-route" type="button">
+                            <i class="bi bi-signpost me-1"></i>Load demo route
+                        </button>
+                    </div>
+
+                    <p class="text-muted-rs mt-3 mb-0" style="font-size:.74rem;line-height:1.55;">
+                        <strong>Load demo route</strong> fills in sample endpoints and plots an illustrative
+                        primary route plus alternatives; it is not a live journey or traffic feed.
+                        Place search uses OpenStreetMap Nominatim. Route calculation uses a public routing
+                        service. Both need internet access and may be rate-limited.
+                    </p>
+                </div>
+            </section>
+
+            <section class="rs-card mb-4" id="route-options-card">
+                <div class="rs-card-header">
+                    <div>
+                        <h2>Route options</h2>
+                        <p class="section-subtitle">Select an alternative to inspect crossings.</p>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="route-options">
+                        <div class="empty-state py-4">
+                            <i class="bi bi-signpost-split"></i>
+                            <p class="fw-bold text-dark mb-1">No route calculated</p>
+                            <p>Choose two points and press Calculate routes.</p>
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2 mt-3">
+                        <button class="btn btn-outline-navy" id="save-route" type="button" disabled>
+                            <i class="bi bi-bookmark-plus me-1"></i>Save this route
+                        </button>
+                        <button class="btn btn-outline-navy" id="watch-route" type="button" disabled>
+                            <i class="bi bi-bell me-1"></i>Watch this route
+                        </button>
+                    </div>
+                    <p class="text-muted-rs mt-2 mb-0" style="font-size:.73rem;line-height:1.55;">
+                        Watching a route checks its nearby crossings while this page stays open.
+                        Browser alerts require notification permission. In-app alerts still work.
+                    </p>
+                </div>
+            </section>
+
+            <section class="rs-card mb-4" id="saved-routes-card">
+                <div class="rs-card-header">
+                    <div>
+                        <h2>Saved routes</h2>
+                        <p class="section-subtitle">Reopen a favourite route.</p>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="saved-routes-mini" class="d-grid gap-2">
+                        <div class="text-muted-rs" style="font-size:.8rem;">Log in to see saved routes.</div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="safety-banner">
+                <i class="bi bi-shield-exclamation me-1"></i>
+                <strong>Never bypass a closed barrier.</strong> A route check is not a guarantee.
+                RailSafe has no live Indian Railways feed, and reported status may be out of date.
+                Obey physical gates, signals and authorised railway staff at all times.
+            </div>
+        </div>
+
+        <div class="col-lg-7 col-xl-8">
+            <section class="rs-card mb-4">
+                <div class="rs-card-header">
+                    <div>
+                        <h2>Crossing map</h2>
+                        <p class="section-subtitle">OpenStreetMap base layer · gate pins reflect displayed status.</p>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <select class="form-select form-select-sm" id="status-filter" aria-label="Filter map by status" style="width:auto;">
+                            <option value="ALL">All statuses</option>
+                            <option value="OPEN">OPEN only</option>
+                            <option value="CLOSED">CLOSED only</option>
+                            <option value="UNKNOWN">UNKNOWN only</option>
+                        </select>
+                        <button class="btn btn-sm btn-outline-navy" id="fit-gates" type="button" title="Fit all crossings">
+                            <i class="bi bi-arrows-fullscreen"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="map-shell">
+                    <div id="map" aria-label="Map of railway crossings"></div>
+                </div>
+                <div class="card-body py-3">
+                    <div class="d-flex flex-wrap gap-3 text-muted-rs" style="font-size:.76rem;">
+                        <span><span class="status-badge status-open" style="font-size:.66rem;"><span class="dot"></span>OPEN</span> reported clear</span>
+                        <span><span class="status-badge status-closed" style="font-size:.66rem;"><span class="dot"></span>CLOSED</span> reported closed</span>
+                        <span><span class="status-badge status-unknown" style="font-size:.66rem;"><span class="dot"></span>UNKNOWN</span> missing or stale</span>
+                        <span><i class="bi bi-info-circle me-1"></i>Pins are reports, not live signals.</span>
+                    </div>
+                    <div class="route-legend mt-2 pt-2">
+                        <span class="small-label me-2">Route colours</span>
+                        <span><span class="route-swatch" style="background:#2563eb"></span>Primary</span>
+                        <span><span class="route-swatch" style="background:#dc2626"></span>Alternative 1</span>
+                        <span><span class="route-swatch" style="background:#16a34a"></span>Alternative 2</span>
+                        <span><span class="route-swatch" style="background:#f97316"></span>Alternative 3</span>
+                        <span><span class="route-swatch" style="background:#eab308"></span>Alternative 4</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="rs-card">
+                <div class="rs-card-header">
+                    <div>
+                        <h2>Railway crossings</h2>
+                        <p class="section-subtitle">Reported and verified crossings. Absence from the map does not mean no crossing exists.</p>
+                    </div>
+                    <span class="badge-soft" id="gate-count">0 crossings</span>
+                </div>
+                <div class="card-body">
+                    <div class="row g-2" id="map-gate-list">
+                        <div class="col-12"><div class="page-loading">
+                            <span class="spinner-border spinner-border-sm text-primary"></span>Loading crossings…
+                        </div></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</main>
+
+<div id="app-footer"></div>
+<div id="toast-root" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+<div class="modal fade" id="saveRouteModal" tabindex="-1" aria-labelledby="saveRouteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:18px;border:0;">
+            <form id="save-route-form">
+                <div class="modal-header">
+                    <h2 class="modal-title h5" id="saveRouteModalLabel">Save route</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert-rs alert-rs-info mb-3" id="save-route-summary"
+                         style="font-size:.82rem;"></div>
+                    <label class="form-label" for="route-name">Route name</label>
+                    <input class="form-control" id="route-name" type="text" maxlength="100" required
+                           placeholder="e.g. Home → Office">
+                    <p class="text-muted-rs mt-3 mb-0" style="font-size:.76rem;">
+                        Saving stores the start/end coordinates and crossings near this calculated route.
+                        It does not store a live traffic snapshot.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-navy" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="save-route-confirm">
+                        <i class="bi bi-bookmark-check me-1"></i>Save route
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/api.js"></script>
+<script src="js/common.js"></script>
+<script src="js/map.js"></script>
+</body>
+</html>

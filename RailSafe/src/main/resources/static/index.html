@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="RailSafe - smart railway gate alerts and route assistance for commuters.">
+    <title>RailSafe – Smart Railway Gate Alerts</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div id="app-nav"></div>
+
+<main>
+    <section class="hero">
+        <div class="container">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-7">
+                    <span class="hero-eyebrow">
+                        <i class="bi bi-broadcast"></i>
+                        Reported and verified status · not a live railway feed
+                    </span>
+                    <h1>Know before <span class="accent">you go.</span></h1>
+                    <p class="lead">
+                        Check railway crossings on your route, see when a gate was last reported,
+                        and get an alert when a crossing is reported closed. Reported and
+                        staff-verified information are clearly labelled.
+                    </p>
+                    <div class="d-flex flex-wrap gap-2 mt-4">
+                        <a href="map.html" class="btn btn-light text-primary fw-bold px-4">
+                            <i class="bi bi-map me-2"></i>Open the gate map
+                        </a>
+                        <a href="dashboard.html" class="btn btn-outline-light px-4">
+                            <i class="bi bi-grid me-2"></i>My dashboard
+                        </a>
+                    </div>
+                    <p class="mt-4 mb-0" style="color:#94a3b8;font-size:.8rem;max-width:38rem;">
+                        <i class="bi bi-shield-exclamation me-1"></i>
+                        Never use RailSafe to bypass a closed barrier. Always obey railway signals,
+                        physical gates and authorised staff.
+                    </p>
+                </div>
+                <div class="col-lg-5">
+                    <div class="hero-card">
+                        <div class="inner">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="small-label">Status colours</span>
+                                <span class="badge-soft">Reported &amp; verified</span>
+                            </div>
+                            <div class="legend-row">
+                                <span><span class="status-badge status-open"><span class="dot"></span>OPEN</span></span>
+                                <span class="text-muted-rs small">Reported clear</span>
+                            </div>
+                            <div class="legend-row">
+                                <span><span class="status-badge status-closed"><span class="dot"></span>CLOSED</span></span>
+                                <span class="text-muted-rs small">Reported closed</span>
+                            </div>
+                            <div class="legend-row">
+                                <span><span class="status-badge status-unknown"><span class="dot"></span>UNKNOWN</span></span>
+                                <span class="text-muted-rs small">Missing or stale</span>
+                            </div>
+                            <div class="mt-3 p-2 rounded-3" style="background:#f8fafc;font-size:.76rem;color:#64748b;">
+                                <i class="bi bi-clock-history me-1"></i>
+                                Every gate shows its source and last updated time.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="container py-4 py-lg-5">
+        <div class="row g-3" id="home-stats">
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <span class="stat-icon navy"><i class="bi bi-signpost-split"></i></span>
+                    <div><div class="stat-value" id="stat-total">–</div><div class="stat-label">Configured crossings</div></div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <span class="stat-icon open"><i class="bi bi-check-circle"></i></span>
+                    <div><div class="stat-value" id="stat-open">–</div><div class="stat-label">Reported OPEN</div></div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <span class="stat-icon closed"><i class="bi bi-x-octagon"></i></span>
+                    <div><div class="stat-value" id="stat-closed">–</div><div class="stat-label">Reported CLOSED</div></div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <span class="stat-icon unknown"><i class="bi bi-question-circle"></i></span>
+                    <div><div class="stat-value" id="stat-unknown">–</div><div class="stat-label">UNKNOWN / stale</div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="container pb-4 pb-lg-5">
+        <div class="d-flex flex-wrap align-items-end justify-content-between gap-2 mb-3">
+            <div>
+                <h2 class="section-title">Crossing board</h2>
+                <p class="section-subtitle">Reported and verified crossings from RailSafe. Not a live railway feed.</p>
+            </div>
+            <a href="map.html" class="btn btn-soft btn-sm">View all on map <i class="bi bi-arrow-right ms-1"></i></a>
+        </div>
+        <div class="row g-3" id="home-gates">
+            <div class="col-12"><div class="page-loading">
+                <span class="spinner-border spinner-border-sm text-primary"></span>Loading crossings…
+            </div></div>
+        </div>
+    </section>
+
+    <section class="container pb-5">
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="rs-card h-100">
+                    <div class="card-body">
+                        <span class="stat-icon mb-3"><i class="bi bi-geo-alt"></i></span>
+                        <h3 class="h6">1. Find crossings near you</h3>
+                        <p class="text-muted-rs small mb-0">
+                            Share your location with permission and RailSafe lists nearby crossings,
+                            their distance and last reported status.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="rs-card h-100">
+                    <div class="card-body">
+                        <span class="stat-icon mb-3"><i class="bi bi-sign-turn-slight-right"></i></span>
+                        <h3 class="h6">2. Plan a route</h3>
+                        <p class="text-muted-rs small mb-0">
+                            OSRM calculates the driving route. RailSafe checks which crossings fall
+                            within 150 m of that routing result and flags reported closures.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="rs-card h-100">
+                    <div class="card-body">
+                        <span class="stat-icon mb-3"><i class="bi bi-bell"></i></span>
+                        <h3 class="h6">3. Get alerts</h3>
+                        <p class="text-muted-rs small mb-0">
+                            Status changes create in-app notifications. With browser permission,
+                            unread alerts can also appear as desktop notifications.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="container pb-5">
+        <div class="safety-banner">
+            <div class="d-flex gap-3">
+                <i class="bi bi-shield-exclamation fs-4"></i>
+                <div>
+                    <strong>Safety comes before the app.</strong>
+                    RailSafe uses reported and verified crossing information. It is not connected to
+                    Indian Railways and cannot confirm a gate is open. A green “OPEN” label is still only
+                    a report. Never cross a closed barrier, never drive around a gate, and always follow
+                    railway signals and authorised staff.
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<div id="app-footer"></div>
+<div id="toast-root" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/api.js"></script>
+<script src="js/common.js"></script>
+<script src="js/home.js"></script>
+</body>
+</html>

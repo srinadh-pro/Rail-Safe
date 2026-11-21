@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dashboard – RailSafe</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div id="app-nav"></div>
+
+<main class="container py-4 py-lg-5">
+    <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-4">
+        <div>
+            <span class="small-label">Commuter dashboard</span>
+            <h1 class="h2 mb-1 mt-1">Hello, <span id="dashboard-name">commuter</span></h1>
+            <p class="text-muted-rs mb-0">
+                Your signed-in view of nearby crossings, live counts, saved routes and gate alerts.
+                <span class="badge-soft ms-1" id="dashboard-role">USER</span>
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="notifications.html" class="btn btn-outline-navy">
+                <i class="bi bi-bell me-1"></i>Alerts
+                <span class="badge text-bg-danger ms-1" id="header-unread" style="display:none;">0</span>
+            </a>
+            <a href="map.html" class="btn btn-primary"><i class="bi bi-map me-1"></i>Open map</a>
+        </div>
+    </div>
+
+    <div id="location-alert" class="hidden mb-3"></div>
+
+    <section class="rs-card mb-4" id="live-stats-card">
+        <div class="rs-card-header">
+            <div>
+                <h2>Live crossing overview</h2>
+                <p class="section-subtitle mb-0">
+                    Login-first summary. A LIVE badge appears only when verified live data is available.
+                </p>
+            </div>
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <span id="dashboard-live-indicator" class="live-indicator" aria-live="polite">Live data unavailable</span>
+                <span id="dashboard-last-sync" class="sync-time" aria-live="polite">Last synchronised: Not Available</span>
+                <button class="btn btn-sm btn-outline-navy" id="refresh-live" type="button" title="Refresh live counts">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row g-3 live-stats-grid">
+                <div class="col-6 col-md-4 col-xl-2">
+                    <div class="stat-card">
+                        <span class="stat-icon navy"><i class="bi bi-signpost-split"></i></span>
+                        <div><div class="stat-value" id="live-total">Not Available</div><div class="stat-label">Total gates</div></div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-xl-2">
+                    <div class="stat-card">
+                        <span class="stat-icon open"><i class="bi bi-check-circle"></i></span>
+                        <div><div class="stat-value" id="live-open">Not Available</div><div class="stat-label">Open</div></div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-xl-2">
+                    <div class="stat-card">
+                        <span class="stat-icon closed"><i class="bi bi-x-octagon"></i></span>
+                        <div><div class="stat-value" id="live-closed">Not Available</div><div class="stat-label">Closed</div></div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-xl-2">
+                    <div class="stat-card">
+                        <span class="stat-icon closing"><i class="bi bi-arrow-down-right-circle"></i></span>
+                        <div><div class="stat-value" id="live-closing">Not Available</div><div class="stat-label">Closing</div></div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-xl-2">
+                    <div class="stat-card">
+                        <span class="stat-icon opening"><i class="bi bi-arrow-up-right-circle"></i></span>
+                        <div><div class="stat-value" id="live-opening">Not Available</div><div class="stat-label">Opening</div></div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-xl-2">
+                    <div class="stat-card">
+                        <span class="stat-icon awaiting"><i class="bi bi-hourglass-split"></i></span>
+                        <div>
+                            <div class="stat-value" id="live-awaiting">Not Available</div>
+                            <div class="stat-label">Awaiting Verification</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-xl-2">
+                    <div class="stat-card">
+                        <span class="stat-icon approaching"><i class="bi bi-train-front"></i></span>
+                        <div><div class="stat-value" id="live-approaching">Not Available</div><div class="stat-label">Approaching trains</div></div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-xl-2">
+                    <div class="stat-card">
+                        <span class="stat-icon active"><i class="bi bi-activity"></i></span>
+                        <div><div class="stat-value" id="live-active">Not Available</div><div class="stat-label">Active crossings</div></div>
+                    </div>
+                </div>
+            </div>
+            <p class="text-muted-rs small mt-3 mb-0" id="live-meta">
+                Source: Not Available · Mode: Not Available · Last successful update: Not Available
+            </p>
+        </div>
+    </section>
+
+    <section class="rs-card mb-4">
+        <div class="rs-card-header">
+            <div>
+                <h2>Demo simulation board</h2>
+                <p class="section-subtitle mb-0">
+                    Fictional gate statuses, train names and expected times for demonstration only.
+                    This panel is never a live railway feed.
+                </p>
+            </div>
+        </div>
+        <div class="card-body"><div id="simulation-body">
+            <div class="page-loading"><span class="spinner-border spinner-border-sm text-primary"></span>Loading demo simulation…</div>
+        </div></div>
+    </section>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="stat-card">
+                <span class="stat-icon navy"><i class="bi bi-geo-alt"></i></span>
+                <div><div class="stat-value" id="nearby-count">–</div><div class="stat-label">Nearby crossings</div></div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="stat-card">
+                <span class="stat-icon closed"><i class="bi bi-x-octagon"></i></span>
+                <div><div class="stat-value" id="nearby-closed">–</div><div class="stat-label">Reported closed</div></div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="stat-card">
+                <span class="stat-icon"><i class="bi bi-bookmark-star"></i></span>
+                <div><div class="stat-value" id="saved-count">–</div><div class="stat-label">Saved routes</div></div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="stat-card">
+                <span class="stat-icon unknown"><i class="bi bi-bell"></i></span>
+                <div><div class="stat-value" id="unread-count">–</div><div class="stat-label">Unread alerts</div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <section class="rs-card mb-4">
+                <div class="rs-card-header">
+                    <div>
+                        <h2>Nearby railway crossings</h2>
+                        <p class="section-subtitle">Sorted by distance from your selected location.</p>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <select class="form-select form-select-sm" id="radius-select" aria-label="Search radius" style="width:auto;">
+                            <option value="2">2 km</option>
+                            <option value="5" selected>5 km</option>
+                            <option value="10">10 km</option>
+                            <option value="25">25 km</option>
+                        </select>
+                        <button class="btn btn-sm btn-outline-navy" id="refresh-nearby" type="button" title="Refresh">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                        <button class="btn btn-soft btn-sm" id="use-location" type="button">
+                            <i class="bi bi-crosshair me-1"></i>Use my location
+                        </button>
+                        <span class="text-muted-rs" style="font-size:.78rem;" id="location-label">
+                            Location not shared yet
+                        </span>
+                    </div>
+                    <div class="row g-3" id="nearby-gates">
+                        <div class="col-12"><div class="page-loading">
+                            <span class="spinner-border spinner-border-sm text-primary"></span>Loading nearby crossings…
+                        </div></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="rs-card">
+                <div class="rs-card-header">
+                    <div>
+                        <h2>Saved favourite routes</h2>
+                        <p class="section-subtitle">Open a route to recalculate crossings using current OSRM data.</p>
+                    </div>
+                    <a href="map.html" class="btn btn-sm btn-soft"><i class="bi bi-plus-lg me-1"></i>Plan route</a>
+                </div>
+                <div class="card-body">
+                    <div id="saved-routes" class="d-grid gap-2">
+                        <div class="page-loading">
+                            <span class="spinner-border spinner-border-sm text-primary"></span>Loading saved routes…
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="col-lg-4">
+            <section class="rs-card mb-4">
+                <div class="rs-card-header">
+                    <h2>Quick actions</h2>
+                </div>
+                <div class="card-body d-grid gap-2">
+                    <a class="btn btn-outline-navy text-start" href="map.html">
+                        <i class="bi bi-sign-turn-right me-2"></i>Plan a route on the map
+                    </a>
+                    <a class="btn btn-outline-navy text-start" href="notifications.html">
+                        <i class="bi bi-bell me-2"></i>Review notification history
+                    </a>
+                    <div class="safety-banner mt-2" style="font-size:.78rem;padding:.75rem;">
+                        <i class="bi bi-shield-exclamation me-1"></i>
+                        A green OPEN status is only a report. Always check the physical barrier.
+                    </div>
+                </div>
+            </section>
+
+            <section class="rs-card">
+                <div class="rs-card-header">
+                    <h2>Recent alerts</h2>
+                    <a href="notifications.html" class="small fw-bold">View all</a>
+                </div>
+                <div class="card-body p-3">
+                    <div id="dashboard-notifications" class="d-grid gap-2">
+                        <div class="page-loading">
+                            <span class="spinner-border spinner-border-sm text-primary"></span>Loading alerts…
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <section class="mt-4">
+        <div class="safety-banner">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <strong>Reported information only.</strong> RailSafe is not connected to Indian Railways.
+            Status may be reported, unverified or stale. Never make a safety-critical decision based only
+            on this app. Obey railway signals and physical barriers.
+        </div>
+    </section>
+</main>
+
+<div id="app-footer"></div>
+<div id="toast-root" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/api.js"></script>
+<script src="js/common.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

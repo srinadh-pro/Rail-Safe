@@ -1,0 +1,1095 @@
+/* ==========================================================================
+   RailSafe login redesign
+   Scope every rule to .login-page so the shared shell/styles.css is untouched.
+   Tokens, spacing (8px scale), header, card, form and the pure CSS/SVG
+   night-railway animation live here.
+   ========================================================================== */
+
+body.login-page {
+    --navy: #0B1F3A;
+    --navy-deep: #06132B;
+    --blue: #2563EB;
+    --blue-dark: #1D4ED8;
+    --blue-soft: #EFF6FF;
+    --amber: #F59E0B;
+    --light: #F1F5F9;
+    --white: #FFFFFF;
+    --ink: #0F172A;
+    --muted: #64748B;
+    --border: #E2E8F0;
+    --border-strong: #CBD5E1;
+    --focus-ring: rgba(37, 99, 235, 0.28);
+
+    --s1: 8px;
+    --s2: 16px;
+    --s3: 24px;
+    --s4: 32px;
+    --s5: 40px;
+
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--light);
+    color: var(--ink);
+}
+
+body.login-page .hidden {
+    display: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   Header — fixes the false sidebar offset from styles.css (.rs-topbar has
+   margin-left: var(--rs-sidebar-width)). Full width, centred 1200px content.
+   -------------------------------------------------------------------------- */
+
+body.login-page .rs-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 1035;
+    min-height: 64px;
+    margin-left: 0;
+    padding: 0 max(var(--s3), calc((100vw - 1200px) / 2));
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+    background: rgba(255, 255, 255, 0.88);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(11, 31, 58, 0.10);
+    box-shadow: 0 2px 12px rgba(11, 31, 58, 0.05);
+}
+
+body.login-page .rs-topbar::after {
+    display: none;
+}
+
+/* No sidebar exists on an auth page: never show the mobile sidebar toggle. */
+body.login-page .sidebar-toggle {
+    display: none !important;
+}
+
+body.login-page .rs-topbar-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+body.login-page .rs-topbar-title::before {
+    content: "";
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+    background-color: var(--navy);
+    background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20fill='%23ffffff'%20d='M12%202%204%205v6c0%205%203.4%209.4%208%2011%204.6-1.6%208-6%208-11V5l-8-3Zm-1%2014-3-3%201.4-1.4L11%2013.2l4.6-4.6L17%2010l-6%206Z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 22px 22px;
+    box-shadow: 0 6px 16px rgba(11, 31, 58, 0.22);
+}
+
+/* common.js renders "RailSafe" + "RailSafe operations console". Replace it
+   with the requested brand line without touching the shared JS. */
+body.login-page .rs-topbar-title strong {
+    display: block;
+    font-size: 0;
+    letter-spacing: normal;
+    color: var(--navy);
+    /* Hide the original text node from the accessibility tree as well. */
+    visibility: hidden;
+}
+
+body.login-page .rs-topbar-title strong::after {
+    content: "RailSafe / operations console";
+    font-size: 0.95rem;
+    font-weight: 700;
+    white-space: nowrap;
+    visibility: visible;
+}
+
+body.login-page .rs-topbar-title small {
+    display: none;
+}
+
+body.login-page .rs-topbar-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--s1);
+}
+
+body.login-page .rs-topbar-actions .btn {
+    --bs-btn-border-radius: 10px;
+    border-radius: 10px;
+    padding: 0.45rem 0.8rem;
+    font-size: 0.8rem;
+    font-weight: 650;
+    line-height: 1.2;
+    transition: transform 0.12s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+body.login-page .rs-topbar-actions .btn-outline-navy {
+    border: 1px solid var(--border-strong);
+    background: var(--white);
+    color: var(--navy);
+}
+
+body.login-page .rs-topbar-actions .btn-outline-navy:hover {
+    background: var(--blue-soft);
+    border-color: var(--blue);
+    color: var(--blue-dark);
+}
+
+body.login-page .rs-topbar-actions .btn-primary {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: var(--white);
+    box-shadow: 0 6px 14px rgba(37, 99, 235, 0.22);
+}
+
+body.login-page .rs-topbar-actions .btn-primary:hover {
+    background: var(--blue-dark);
+    transform: translateY(-1px);
+}
+
+body.login-page .rs-topbar-actions .btn:active {
+    transform: translateY(1px) scale(0.99);
+}
+
+/* Footer is intentionally hidden on this single-screen auth page. */
+body.login-page #app-footer {
+    display: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   Page shell and card
+   -------------------------------------------------------------------------- */
+
+body.login-page main.auth-page {
+    min-height: calc(100vh - 64px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--s2) var(--s3) var(--s3);
+    background:
+        radial-gradient(circle at 12% 8%, rgba(37, 99, 235, 0.10), transparent 32%),
+        radial-gradient(circle at 88% 92%, rgba(245, 158, 11, 0.08), transparent 28%),
+        var(--light);
+}
+
+body.login-page .login-shell {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+body.login-page .login-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
+    overflow: hidden;
+    border-radius: 20px;
+    background: var(--white);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    box-shadow: 0 24px 60px rgba(11, 31, 58, 0.16), 0 2px 8px rgba(11, 31, 58, 0.06);
+    animation: cardIn 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes cardIn {
+    from { opacity: 0; transform: translate3d(0, 16px, 0); }
+    to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+/* --------------------------------------------------------------------------
+   Left visual panel
+   -------------------------------------------------------------------------- */
+
+body.login-page .login-visual {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--s3);
+    min-height: 560px;
+    padding: var(--s4);
+    color: var(--white);
+    background: var(--navy-deep);
+    overflow: hidden;
+}
+
+body.login-page .rail-scene {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    overflow: hidden;
+}
+
+body.login-page .rail-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* Readability veil: dark behind the headline and the feature strip, clear
+   across the middle so the animation stays visible. */
+body.login-page .login-visual::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(
+        180deg,
+        rgba(11, 31, 58, 0.88) 0%,
+        rgba(11, 31, 58, 0.42) 30%,
+        rgba(11, 31, 58, 0.02) 52%,
+        rgba(11, 31, 58, 0.62) 78%,
+        rgba(11, 31, 58, 0.92) 100%
+    );
+}
+
+body.login-page .visual-content {
+    max-width: 34ch;
+}
+
+body.login-page .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: var(--s2);
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #DBEAFE;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+body.login-page .eyebrow svg {
+    width: 14px;
+    height: 14px;
+    fill: #93C5FD;
+}
+
+body.login-page .visual-content h2 {
+    margin: 0 0 var(--s1);
+    font-size: clamp(1.55rem, 2.1vw, 2rem);
+    line-height: 1.18;
+    letter-spacing: -0.035em;
+    font-weight: 800;
+}
+
+body.login-page .visual-content p {
+    margin: 0;
+    color: #D6E2F2;
+    font-size: 0.86rem;
+    line-height: 1.6;
+}
+
+body.login-page .feature-list {
+    display: grid;
+    gap: var(--s1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+body.login-page .feature-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+}
+
+body.login-page .feature-icon {
+    flex: 0 0 28px;
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    border-radius: 9px;
+    background: rgba(37, 99, 235, 0.30);
+    border: 1px solid rgba(147, 197, 253, 0.28);
+}
+
+body.login-page .feature-icon svg {
+    width: 16px;
+    height: 16px;
+    fill: #BFDBFE;
+}
+
+body.login-page .feature-list strong {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+body.login-page .feature-list small {
+    display: block;
+    color: #B8C9E2;
+    font-size: 0.68rem;
+    line-height: 1.3;
+}
+
+body.login-page .scene-note {
+    position: absolute;
+    right: var(--s3);
+    bottom: 10px;
+    margin: 0;
+    color: rgba(226, 232, 240, 0.62);
+    font-size: 0.6rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+/* --------------------------------------------------------------------------
+   Right form panel
+   -------------------------------------------------------------------------- */
+
+body.login-page .login-form-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s2);
+    padding: var(--s4);
+    background: var(--white);
+}
+
+body.login-page .form-kicker {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--blue);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+body.login-page .form-heading h1 {
+    margin: 0 0 4px;
+    color: var(--navy);
+    font-size: 1.65rem;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+    font-weight: 800;
+}
+
+body.login-page .form-heading p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.84rem;
+    line-height: 1.5;
+}
+
+/* Inline alert produced by RailSafeUI.inlineAlert() in js/auth.js */
+body.login-page #auth-alert .alert-rs {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    padding: 10px 12px;
+    border-left-width: 4px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    animation: alertIn 0.24s ease-out both;
+}
+
+body.login-page #auth-alert .alert-rs::before {
+    content: "!";
+    flex: 0 0 20px;
+    width: 20px;
+    height: 20px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(220, 38, 38, 0.14);
+    color: #B91C1C;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+body.login-page #auth-alert .alert-rs-success::before {
+    content: "✓";
+    background: rgba(22, 163, 74, 0.14);
+    color: #15803D;
+}
+
+@keyframes alertIn {
+    from { opacity: 0; transform: translate3d(0, -4px, 0); }
+    to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+/* Fields */
+body.login-page #login-form {
+    display: grid;
+    gap: var(--s2);
+}
+
+body.login-page .field label {
+    display: block;
+    margin-bottom: 6px;
+    color: #334155;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+body.login-page .input-wrap {
+    position: relative;
+}
+
+body.login-page .field-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    width: 18px;
+    height: 18px;
+    transform: translateY(-50%);
+    fill: var(--muted);
+    pointer-events: none;
+}
+
+body.login-page .field input {
+    width: 100%;
+    height: 44px;
+    padding: 0 44px 0 42px;
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    background: var(--white);
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.88rem;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+body.login-page #login-email {
+    padding-right: var(--s2);
+}
+
+body.login-page .field input::placeholder {
+    color: #94A3B8;
+}
+
+body.login-page .field input:hover {
+    border-color: #94A3B8;
+}
+
+body.login-page .field input:focus {
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: 0 0 0 4px var(--focus-ring);
+    background: #FCFDFF;
+}
+
+body.login-page .password-toggle {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    transform: translateY(-50%);
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+body.login-page .password-toggle:hover {
+    background: var(--light);
+    color: var(--navy);
+}
+
+body.login-page .password-toggle svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+}
+
+body.login-page .password-toggle .icon-eye-off,
+body.login-page .password-toggle.is-visible .icon-eye {
+    display: none;
+}
+
+body.login-page .password-toggle.is-visible .icon-eye-off {
+    display: block;
+}
+
+/* Submit */
+body.login-page .login-submit {
+    width: 100%;
+    height: 46px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 1px solid var(--blue);
+    border-radius: 12px;
+    background: var(--blue);
+    color: var(--white);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 18px rgba(37, 99, 235, 0.22);
+    transition: transform 0.12s ease, background 0.15s ease,
+                border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+body.login-page .login-submit:hover {
+    background: var(--blue-dark);
+    border-color: var(--blue-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 12px 22px rgba(37, 99, 235, 0.26);
+}
+
+body.login-page .login-submit:active,
+body.login-page .login-submit.is-loading {
+    transform: translateY(1px) scale(0.995);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.20);
+}
+
+body.login-page .login-submit:disabled {
+    cursor: wait;
+    opacity: 0.88;
+}
+
+body.login-page .login-submit .submit-icon {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+}
+
+/* Bootstrap spinner injected by setButtonLoading() in js/auth.js */
+body.login-page .login-submit .spinner-border {
+    width: 18px;
+    height: 18px;
+    border-width: 2.5px;
+}
+
+/* --------------------------------------------------------------------------
+   Demo accounts — compact two-column grid
+   -------------------------------------------------------------------------- */
+
+body.login-page .demo-accounts {
+    padding-top: var(--s2);
+    border-top: 1px solid var(--border);
+}
+
+body.login-page .demo-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s1);
+}
+
+body.login-page .demo-heading h2 {
+    margin: 0;
+    color: var(--navy);
+    font-size: 0.88rem;
+    font-weight: 800;
+}
+
+body.login-page .dev-badge {
+    flex: 0 0 auto;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: #FFF7ED;
+    border: 1px solid #FED7AA;
+    color: #9A3412;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+}
+
+body.login-page .demo-intro {
+    margin: 4px 0 10px;
+    color: var(--muted);
+    font-size: 0.7rem;
+    line-height: 1.4;
+}
+
+/* Override Bootstrap's .row.g-2 grid so js/auth.js markup stays untouched. */
+body.login-page #demo-account-cards.row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--s1);
+    margin: 0;
+}
+
+body.login-page #demo-account-cards > div {
+    width: auto !important;
+    flex: none !important;
+    padding: 0 !important;
+}
+
+body.login-page #demo-account-cards > .col-12:only-child {
+    grid-column: 1 / -1;
+}
+
+body.login-page #demo-account-cards .demo-account-card {
+    height: 100%;
+    padding: 9px 11px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #F8FAFC;
+    box-shadow: none;
+    transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+body.login-page #demo-account-cards .demo-account-card:hover {
+    transform: translateY(-1px);
+    border-color: #93C5FD;
+    background: var(--white);
+    box-shadow: 0 8px 18px rgba(37, 99, 235, 0.10);
+}
+
+body.login-page #demo-account-cards .demo-role {
+    padding: 3px 7px;
+    border-radius: 999px;
+    background: var(--navy);
+    color: var(--white);
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+}
+
+body.login-page #demo-account-cards .badge-soft {
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: var(--blue-soft);
+    border-color: #DBEAFE;
+    color: var(--blue-dark);
+    font-size: 0.6rem;
+    font-weight: 700;
+}
+
+body.login-page #demo-account-cards .demo-credential {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin-top: 4px;
+    font-size: 0.66rem;
+    line-height: 1.25;
+}
+
+body.login-page #demo-account-cards .demo-credential span {
+    min-width: 48px;
+    color: var(--muted);
+    font-size: 0.6rem;
+    font-weight: 700;
+}
+
+body.login-page #demo-account-cards .demo-credential code {
+    padding: 1px 4px;
+    border-radius: 5px;
+    background: #E8EEF6;
+    color: #1E293B;
+    font-size: 0.62rem;
+    overflow-wrap: anywhere;
+}
+
+body.login-page #demo-account-cards .demo-description {
+    display: none;
+}
+
+body.login-page #demo-account-cards .demo-use {
+    width: 100%;
+    height: 28px;
+    margin-top: 8px;
+    padding: 0 8px;
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    background: var(--white);
+    color: var(--navy);
+    font-size: 0.68rem;
+    font-weight: 700;
+    line-height: 1;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+body.login-page #demo-account-cards .demo-use:hover {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: var(--white);
+}
+
+body.login-page .form-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 2px var(--s2);
+    padding-top: 2px;
+    text-align: center;
+}
+
+body.login-page .form-links p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.72rem;
+}
+
+body.login-page .form-links a {
+    color: var(--blue);
+    font-weight: 700;
+}
+
+body.login-page .form-links a:hover {
+    color: var(--blue-dark);
+    text-decoration: underline;
+}
+
+/* --------------------------------------------------------------------------
+   Night railway animation — transform/opacity only, GPU friendly
+   -------------------------------------------------------------------------- */
+
+body.login-page .star {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: twinkle 3.2s ease-in-out infinite;
+}
+
+body.login-page .cloud-parallax {
+    animation: cloudDrift 38s linear infinite;
+    will-change: transform;
+}
+
+body.login-page .hills-far {
+    animation: hillFarDrift 52s linear infinite;
+    will-change: transform;
+}
+
+body.login-page .hills-near {
+    animation: hillNearDrift 34s linear infinite;
+    will-change: transform;
+}
+
+body.login-page .pole-parallax {
+    animation: poleDrift 18s linear infinite;
+    will-change: transform;
+}
+
+body.login-page .train {
+    animation: trainPass 20s linear infinite;
+    will-change: transform;
+}
+
+body.login-page .window {
+    fill: #FBBF24;
+    opacity: 0.86;
+    animation: windowGlow 2.6s ease-in-out infinite;
+}
+
+body.login-page .headlight-beam {
+    animation: beamPulse 2s ease-in-out infinite;
+}
+
+body.login-page .headlight-glow {
+    animation: beamPulse 1.4s ease-in-out infinite;
+}
+
+body.login-page .puff {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: puff 2.8s ease-out infinite;
+}
+
+body.login-page .puff-2 { animation-delay: 0.9s; }
+body.login-page .puff-3 { animation-delay: 1.8s; }
+
+body.login-page .gate-arm {
+    transform-box: fill-box;
+    transform-origin: 100% 50%;
+    animation: gateCycle 20s linear infinite;
+    will-change: transform;
+}
+
+body.login-page .signal-lights {
+    animation: signalActive 20s linear infinite;
+}
+
+body.login-page .signal-a {
+    animation: blinkA 0.9s steps(1, end) infinite;
+}
+
+body.login-page .signal-b {
+    animation: blinkB 0.9s steps(1, end) infinite;
+}
+
+@keyframes twinkle {
+    0%, 100% { opacity: 0.22; transform: scale(0.6); }
+    50%      { opacity: 1;    transform: scale(1.25); }
+}
+
+@keyframes cloudDrift {
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(-320px, 0, 0); }
+}
+
+@keyframes hillFarDrift {
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(-320px, 0, 0); }
+}
+
+@keyframes hillNearDrift {
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(-160px, 0, 0); }
+}
+
+@keyframes poleDrift {
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(-160px, 0, 0); }
+}
+
+@keyframes trainPass {
+    from { transform: translate3d(-420px, 0, 0); }
+    to   { transform: translate3d(680px, 0, 0); }
+}
+
+@keyframes gateCycle {
+    0%, 36%   { transform: rotate(-68deg); }
+    42%, 74%  { transform: rotate(0deg); }
+    80%, 100% { transform: rotate(-68deg); }
+}
+
+@keyframes signalActive {
+    0%, 38%   { opacity: 0.22; }
+    42%, 76%  { opacity: 1; }
+    80%, 100% { opacity: 0.22; }
+}
+
+@keyframes blinkA {
+    0%, 49%  { opacity: 1; }
+    50%, 100% { opacity: 0.12; }
+}
+
+@keyframes blinkB {
+    0%, 49%  { opacity: 0.12; }
+    50%, 100% { opacity: 1; }
+}
+
+@keyframes puff {
+    0%   { opacity: 0.55; transform: translate3d(0, 0, 0) scale(0.6); }
+    100% { opacity: 0;    transform: translate3d(-30px, -38px, 0) scale(1.6); }
+}
+
+@keyframes windowGlow {
+    0%, 100% { opacity: 0.78; }
+    50%      { opacity: 1; }
+}
+
+@keyframes beamPulse {
+    0%, 100% { opacity: 0.75; }
+    50%      { opacity: 1; }
+}
+
+/* --------------------------------------------------------------------------
+   Focus visibility and responsive behaviour
+   -------------------------------------------------------------------------- */
+
+body.login-page a:focus-visible,
+body.login-page button:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.48);
+    outline-offset: 2px;
+    border-radius: 6px;
+}
+
+@media (max-width: 900px) {
+    body.login-page .login-card {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    body.login-page .login-visual {
+        min-height: 240px;
+        padding: var(--s3);
+        gap: var(--s2);
+    }
+
+    body.login-page .visual-content {
+        max-width: 46ch;
+    }
+
+    body.login-page .rail-scene {
+        opacity: 0.6;
+    }
+
+    body.login-page .feature-list {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    body.login-page .feature-list li {
+        align-items: flex-start;
+    }
+
+    body.login-page .rs-topbar {
+        min-height: 56px;
+        padding: 8px var(--s2);
+        flex-wrap: wrap;
+    }
+
+    body.login-page .rs-topbar-actions .btn {
+        padding: 0.38rem 0.65rem;
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 600px) {
+    body.login-page main.auth-page {
+        padding: var(--s1);
+    }
+
+    body.login-page .rs-topbar-title::before {
+        flex-basis: 32px;
+        width: 32px;
+        height: 32px;
+        background-size: 20px 20px;
+    }
+
+    body.login-page .rs-topbar-title strong::after {
+        font-size: 0.82rem;
+    }
+
+    body.login-page .rs-topbar-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    body.login-page .rail-scene {
+        display: none;
+    }
+
+    body.login-page .login-visual {
+        min-height: auto;
+    }
+
+    body.login-page .feature-list {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    body.login-page .feature-list small {
+        display: none;
+    }
+
+    body.login-page .scene-note {
+        display: none;
+    }
+
+    body.login-page .login-form-panel {
+        padding: var(--s3) var(--s2);
+    }
+
+    body.login-page #demo-account-cards.row {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    body.login-page .form-links {
+        flex-direction: column;
+    }
+}
+
+/* Keep the whole page in one desktop viewport on shorter laptops. */
+@media (min-width: 901px) and (max-height: 820px) {
+    body.login-page .login-form-panel {
+        padding: 20px var(--s3);
+        gap: 10px;
+    }
+
+    body.login-page .form-heading h1 {
+        font-size: 1.45rem;
+    }
+
+    body.login-page .form-heading p,
+    body.login-page .demo-intro {
+        display: none;
+    }
+
+    body.login-page #login-form {
+        gap: 12px;
+    }
+
+    body.login-page .field label {
+        margin-bottom: 4px;
+    }
+
+    body.login-page .field input {
+        height: 40px;
+    }
+
+    body.login-page .login-submit {
+        height: 42px;
+    }
+
+    body.login-page .demo-accounts {
+        padding-top: 12px;
+    }
+
+    body.login-page .demo-heading h2 {
+        font-size: 0.8rem;
+    }
+
+    body.login-page #demo-account-cards .demo-account-card {
+        padding: 6px 10px;
+    }
+
+    /* Drop the redundant username line (email is already shown) and the
+       role label chip when a card contains the full credential set. */
+    body.login-page #demo-account-cards .demo-account-card:has(> .demo-credential:nth-child(4)) > .demo-credential:nth-child(2),
+    body.login-page #demo-account-cards .badge-soft {
+        display: none;
+    }
+
+    body.login-page #demo-account-cards .demo-use {
+        height: 26px;
+        margin-top: 6px;
+    }
+
+    body.login-page .form-links {
+        font-size: 0.68rem;
+    }
+}
+
+/* Reduced motion: freeze the scene in a clear, readable pose. */
+@media (prefers-reduced-motion: reduce) {
+    body.login-page *,
+    body.login-page *::before,
+    body.login-page *::after {
+        animation-play-state: paused !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    body.login-page .login-card {
+        animation: none !important;
+        opacity: 1;
+        transform: none;
+    }
+
+    body.login-page .train {
+        transform: translate3d(120px, 0, 0) !important;
+    }
+
+    body.login-page .gate-arm {
+        transform: rotate(0deg) !important;
+    }
+
+    body.login-page .signal-lights,
+    body.login-page .signal {
+        opacity: 1 !important;
+    }
+
+    body.login-page .puff {
+        opacity: 0.25 !important;
+    }
+}

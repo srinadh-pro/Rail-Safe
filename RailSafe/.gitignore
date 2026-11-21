@@ -1,0 +1,10 @@
+# Local secrets - never commit
+deployment/railsafe.env.local
+
+# Build output
+target/
+frontend/dist/
+frontend/node_modules/
+
+# Local H2 databases and backups
+data/

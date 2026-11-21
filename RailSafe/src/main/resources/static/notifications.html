@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Notifications – RailSafe</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div id="app-nav"></div>
+
+<main class="container py-4 py-lg-5">
+    <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-4">
+        <div>
+            <span class="small-label">Alert centre</span>
+            <h1 class="h2 mb-1 mt-1">Notifications <span class="badge text-bg-danger align-middle" id="unread-badge" style="display:none;">0</span></h1>
+            <p class="text-muted-rs mb-0">Gate status changes and report decisions for your account.</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-outline-navy" id="enable-browser" type="button">
+                <i class="bi bi-bell me-1"></i>Enable browser alerts
+            </button>
+            <button class="btn btn-primary" id="mark-all-read" type="button">
+                <i class="bi bi-check2-all me-1"></i>Mark all read
+            </button>
+        </div>
+    </div>
+
+    <div id="notification-alert" class="hidden mb-3"></div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="rs-card">
+                <div class="rs-card-header">
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Filter notifications">
+                        <button class="btn btn-soft filter-btn active" data-filter="all">All</button>
+                        <button class="btn btn-outline-navy filter-btn" data-filter="unread">Unread</button>
+                    </div>
+                    <button class="btn btn-sm btn-outline-navy" id="refresh-notifications" type="button">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="notification-list" class="d-grid gap-2">
+                        <div class="page-loading">
+                            <span class="spinner-border spinner-border-sm text-primary"></span>Loading notifications…
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="rs-card mb-3">
+                <div class="card-body">
+                    <span class="stat-icon mb-3"><i class="bi bi-broadcast"></i></span>
+                    <h2 class="h6">How alerts work</h2>
+                    <p class="text-muted-rs small mb-2">
+                        When an authorised staff member changes a gate to CLOSED, OPEN or UNKNOWN,
+                        RailSafe records the history and creates an alert for commuter accounts.
+                    </p>
+                    <p class="text-muted-rs small mb-0">
+                        Each status event gets a unique deduplication key, so the same update is not
+                        delivered twice. Browser alerts require your permission and work best on
+                        <code>localhost</code> or HTTPS.
+                    </p>
+                </div>
+            </div>
+            <div class="safety-banner">
+                <i class="bi bi-shield-exclamation me-1"></i>
+                Notifications are based on reported and verified events. They are not live railway
+                signals. Never rely on an alert to decide whether it is safe to cross.
+            </div>
+        </div>
+    </div>
+</main>
+
+<div id="app-footer"></div>
+<div id="toast-root" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/api.js"></script>
+<script src="js/common.js"></script>
+<script src="js/notifications.js"></script>
+</body>
+</html>
