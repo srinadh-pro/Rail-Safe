@@ -18,10 +18,12 @@ services:
         - render.yaml
 
     envVars:
-      # DB_URL is deliberately not prompted: application.properties already has
-      # the full jdbc:mysql://... URL for this Aiven instance, including VERIFY_CA
-      # and the bundled truststore. Set DB_URL only to override that endpoint, and
-      # never paste Aiven's short mysql://... service URI (the MySQL driver rejects it).
+      # Supply the FULL JDBC URL here. Aiven's short mysql://user:pass@host:port/db
+      # URI is rejected by the MySQL driver ("claims to not accept jdbcUrl").
+      # Keep credentials out of the URL: they come from DB_USERNAME / DB_PASSWORD,
+      # and the truststore password from AIVEN_TRUSTSTORE_PASSWORD.
+      - key: DB_URL
+        sync: false
       - key: DB_USERNAME
         value: avnadmin
       - key: DB_PASSWORD

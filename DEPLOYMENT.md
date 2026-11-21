@@ -44,17 +44,18 @@ Do **not** set `RAILSAFE_SERVER_ADDRESS=127.0.0.1` on Render.
 
    | Variable | Value |
    |---|---|
-   | `DB_URL` | **Leave unset.** The committed default in `application.properties` is already the full JDBC URL for this Aiven instance. Set it only when changing the endpoint. |
+   | `DB_URL` | Full JDBC URL, e.g. `jdbc:mysql://mysql-e1e61fd-railsafe.j.aivencloud.com:17447/defaultdb?sslMode=VERIFY_CA&trustCertificateKeyStoreUrl=classpath:aiven-truststore.p12&trustCertificateKeyStoreType=PKCS12&serverTimezone=UTC&useUnicode=true&characterEncoding=utf8` |
    | `DB_USERNAME` | Aiven user (default in Blueprint: `avnadmin`) |
    | `DB_PASSWORD` | Aiven database password |
    | `AIVEN_TRUSTSTORE_PASSWORD` | Password for the bundled Aiven truststore |
    | `RAILSAFE_SUPER_ADMIN_EMAIL` | Bootstrap SUPER_ADMIN email |
    | `RAILSAFE_SUPER_ADMIN_PASSWORD` | Strong bootstrap SUPER_ADMIN password |
 
-   If you do override `DB_URL`, it must be a full `jdbc:mysql://...` URL. Pasting the
-   short `mysql://user:pass@host:port/db` URI from Aiven fails with "Driver
-   com.mysql.cj.jdbc.Driver claims to not accept jdbcUrl". The truststore password
-   is supplied separately as a driver property, so keep it out of the URL.
+   `DB_URL` **must** be a full `jdbc:mysql://...` URL. Pasting the short
+   `mysql://user:pass@host:port/db` URI from Aiven fails with "Driver
+   com.mysql.cj.jdbc.Driver claims to not accept jdbcUrl". Keep credentials out
+   of the URL: `DB_USERNAME`/`DB_PASSWORD` carry them, and the truststore password
+   is passed separately as a driver property via `AIVEN_TRUSTSTORE_PASSWORD`.
 
 6. Keep the non-secret values from the Blueprint:
    - `RAILSAFE_FORWARD_HEADERS_STRATEGY=framework`
