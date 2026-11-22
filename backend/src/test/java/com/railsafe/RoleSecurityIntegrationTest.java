@@ -15,10 +15,12 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** Verifies login-first access and role-specific dashboard/API restrictions. */
+/**
+ * Verifies login-first access and role-specific API restrictions.
+ * HTML pages are served by the separate frontend project; this suite covers the API.
+ */
 @SpringBootTest(properties = {
         "spring.datasource.url=jdbc:h2:mem:railsafe-security-test;MODE=Oracle;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1",
         "spring.datasource.driver-class-name=org.h2.Driver",
@@ -38,32 +40,19 @@ class RoleSecurityIntegrationTest {
     @Autowired private ObjectMapper objectMapper;
 
     @Test
-    void unauthenticatedPagesRedirectToLoginAndApisReturn401() throws Exception {
-        mockMvc.perform(get("/dashboard.html"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login.html?next=dashboard.html"));
+    void unauthenticatedApisReturn401AndHealthIsPublic() throws Exception {
+        mockMvc.perform(get("/api/health"))
+                .andExpect(status().isOk());
 
         mockMvc.perform(get("/api/live/counts"))
                 .andExpect(status().isUnauthorized());
         mockMvc.perform(get("/api/super-admin/system/health"))
                 .andExpect(status().isUnauthorized());
-        mockMvc.perform(get("/login.html"))
-                .andExpect(status().isOk());
     }
 
     @Test
-    void customerCannotReachStaffAdminOrSuperAdminAreas() throws Exception {
+    void customerCannotReachStaffAdminOrSuperAdminApis() throws Exception {
         MockHttpSession customer = login("customer@railsafe.demo", "Customer@123");
-
-        mockMvc.perform(get("/staff.html").session(customer))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/dashboard.html?denied=1"));
-        mockMvc.perform(get("/admin.html").session(customer))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/dashboard.html?denied=1"));
-        mockMvc.perform(get("/super-admin.html").session(customer))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/dashboard.html?denied=1"));
 
         mockMvc.perform(get("/api/staff/gates").session(customer)).andExpect(status().isForbidden());
         mockMvc.perform(get("/api/admin/staff").session(customer)).andExpect(status().isForbidden());
@@ -73,50 +62,32 @@ class RoleSecurityIntegrationTest {
     }
 
     @Test
-    void staffCannotReachAdminOrSuperAdminAreas() throws Exception {
+    void staffCannotReachAdminOrSuperAdminApis() throws Exception {
         MockHttpSession staff = login("staff@railsafe.demo", "Staff@123");
-
-        mockMvc.perform(get("/admin.html").session(staff))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/staff.html?denied=1"));
-        mockMvc.perform(get("/super-admin.html").session(staff))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/staff.html?denied=1"));
 
         mockMvc.perform(get("/api/admin/staff").session(staff)).andExpect(status().isForbidden());
         mockMvc.perform(get("/api/super-admin/system/health").session(staff)).andExpect(status().isForbidden());
     }
 
     @Test
-    void adminCannotReachSuperAdminArea() throws Exception {
+    void adminCannotReachSuperAdminApi() throws Exception {
         MockHttpSession admin = login("admin@railsafe.demo", "Admin@123");
 
-        mockMvc.perform(get("/super-admin.html").session(admin))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/admin.html?denied=1"));
         mockMvc.perform(get("/api/super-admin/system/health").session(admin))
                 .andExpect(status().isForbidden());
     }
 
     @Test
-    void eachRoleCanOpenItsOwnDashboardAndPermittedApi() throws Exception {
-        mockMvc.perform(get("/dashboard.html").session(login("customer@railsafe.demo", "Customer@123")))
-                .andExpect(status().isOk());
+    void eachRoleCanUseItsPermittedApis() throws Exception {
         mockMvc.perform(get("/api/live/counts").session(login("customer@railsafe.demo", "Customer@123")))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/staff.html").session(login("staff@railsafe.demo", "Staff@123")))
-                .andExpect(status().isOk());
         mockMvc.perform(get("/api/staff/gates").session(login("staff@railsafe.demo", "Staff@123")))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/admin.html").session(login("admin@railsafe.demo", "Admin@123")))
-                .andExpect(status().isOk());
         mockMvc.perform(get("/api/admin/staff").session(login("admin@railsafe.demo", "Admin@123")))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/super-admin.html").session(login("superadmin@railsafe.demo", TEST_SUPER_ADMIN_PASSWORD)))
-                .andExpect(status().isOk());
         mockMvc.perform(get("/api/super-admin/system/health")
                         .session(login("superadmin@railsafe.demo", TEST_SUPER_ADMIN_PASSWORD)))
                 .andExpect(status().isOk());

@@ -317,15 +317,19 @@ These demo shortcut values are historical examples only. The Aiven SUPER_ADMIN p
 
 ## 8. Vercel + Render deployment readiness
 
-- Added root `vercel.json`: Vercel installs/builds `frontend/`, publishes
-  `src/main/resources/static`, proxies `/api/*` to the Render service through the
+- Split the repository into independent deployables: `frontend/` (all static pages,
+  React source and `vercel.json`) and `backend/` (Spring Boot API, `Dockerfile`,
+  `.dockerignore`, SQL scripts and docs).
+- `frontend/vercel.json`: installs with `npm ci`, builds with `npm run build`,
+  publishes `frontend/dist`, proxies `/api/*` to the Render service through the
   required `BACKEND_URL` environment variable, and rewrites `/live/` to the built
-  React `index.html`. API rewrite caching is disabled.
-- Added root `render.yaml` and root `Dockerfile`: one Docker web service,
-  multi-stage Maven build, JRE 17 runtime, public `/api/health` health check,
-  `PORT` binding, forwarded headers, Secure cookies and HSTS. Secrets use
-  `sync: false` and remain in the Render dashboard.
-- Added `.dockerignore`, `.vercelignore` and root `DEPLOYMENT.md`. The existing
+  React `index.html`. API rewrite caching is disabled. Set Vercel's **Root
+  Directory** to `frontend`.
+- Root `render.yaml` plus `backend/Dockerfile`: one Docker web service with
+  `rootDir: backend`, multi-stage Maven build, JRE 17 runtime, public `/api/health`
+  health check, `PORT` binding, forwarded headers, Secure cookies and HSTS. Secrets
+  use `sync: false` and remain in the Render dashboard.
+- Added root `DEPLOYMENT.md` covering both platforms and local runs. The existing
   static pages, element IDs, form names, root-relative API URLs, token CSRF flow,
   sensor-webhook exemption, login lockout and labelled simulation UI are unchanged.
 - The browser continues to call one origin (Vercel), so no CORS, `SameSite=None`

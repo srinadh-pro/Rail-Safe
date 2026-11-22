@@ -1,9 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "installCommand": "cd RailSafe/frontend && npm ci",
-  "buildCommand": "cd RailSafe/frontend && npm run build",
-  "outputDirectory": "RailSafe/src/main/resources/static",
+  "installCommand": "npm ci",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "routes": [
     {
       "src": "^/api/(.*)$",

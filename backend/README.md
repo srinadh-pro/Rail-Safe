@@ -87,24 +87,25 @@ A gate is shown as `OPEN` or `CLOSED` only when its stored status is fresh and v
 |---|---|
 | Language | Java 17 |
 | Backend | Spring Boot 3.5.16, Spring Web, Spring Data JPA, Spring Security, Bean Validation, Spring Scheduling |
-| Database | Oracle Database 19c+ (default), H2 (smoke tests), MySQL 8 (optional profile) |
+| Database | MySQL 8 on Aiven with TLS (default), H2 (local `h2` profile); Oracle SQL scripts retained for reference |
 | Auth | Session-based login with BCrypt password hashes and `JSESSIONID` |
 | Build | Maven (wrapper included) |
-| Frontend | HTML5, CSS3, vanilla JavaScript, Bootstrap 5.3, Bootstrap Icons |
-| **Live dashboard** | React 18, Vite 5, Leaflet 1.9 (build output copied into Spring static resources) |
+| Frontend | Separate `frontend/` project: HTML5, CSS3, vanilla JavaScript, Bootstrap 5.3, Bootstrap Icons |
+| **Live dashboard** | React 18, Vite 5, Leaflet 1.9 (built in `frontend/` and deployed on Vercel) |
 | Maps | Leaflet 1.9, OpenStreetMap tiles |
 | Routing | Public OSRM demo server (network required); replace for production |
 | Place search | OpenStreetMap Nominatim (network required) |
 | Optional delivery | JavaMailSender and a generic SMS webhook, both disabled by default |
 
-Node.js is required only to build the React dashboard (`npm install`, `npm run build`). The packaged Spring Boot JAR serves the pre-built dashboard; Node is not needed at runtime.
+This folder contains only the API. All browser assets live in the sibling
+`frontend/` project; Node.js is not needed to build or run the backend.
 
 ---
 
 ## 3. Project structure
 
 ```text
-RailSafe/
+backend/
 ├── pom.xml
 ├── mvnw, mvnw.cmd, .mvn/            # Maven wrapper (no global Maven required)
 ├── README.md
@@ -119,7 +120,8 @@ RailSafe/
 │   ├── LIVE_SYSTEM.md               # live architecture, API, DB, tests, limitations
 │   ├── PRESENTATION.md              # abstract, PPT content, demo sequence, 3-minute script
 │   └── VIVA.md                      # technical viva questions and answers
-├── frontend/                        # React + Vite source for the /live/ dashboard
+├── Dockerfile                       # production image used by Render
+├── deployment/                      # local env template, start script, nginx sample
 ├── data/                            # H2 files, created only in the h2 profile
 └── src/main/
     ├── java/com/railsafe/
@@ -138,13 +140,12 @@ RailSafe/
     └── resources/
         ├── application.properties     # Aiven MySQL default configuration
         ├── application-h2.properties  # optional H2 profile
-        └── static/
-            ├── index.html, login.html, register.html
-            ├── dashboard.html, map.html, gate.html
-            ├── notifications.html, admin.html, super-admin.html
-            ├── css/styles.css
-            └── js/*.js
+        ├── aiven-truststore.p12       # Aiven CA used with sslMode=VERIFY_CA
+        ├── META-INF/spring.factories  # normalises short Aiven DB_URL at startup
+        └── reference/osm-crossings.json
 ```
+
+The browser UI is in `../frontend/` (all pages in `public/`, React source in `src/`).
 
 ### Backend file-by-file
 
@@ -215,12 +216,12 @@ RailSafe/
 | `css/styles.css` | Design system, status colours, map/admin/history styles |
 | `js/api.js` | Fetch wrapper, JSON errors, 401 handling |
 | `js/common.js` | Shared navigation, footer, role-aware links, badges, toasts, formatting |
-| `frontend/src/App.jsx` | React dashboard composition, gate selector, auth state |
-| `frontend/src/hooks.js` | Dashboard polling, countdown ticking, notification polling |
-| `frontend/src/components/*` | Provider, gate, countdown, trains, demo routes, OSRM routes, map and notification panels |
-| `frontend/src/components/DemoRoutesPanel.jsx` | Synthetic per-crossing alternatives with map and explicit demo labels |
-| `frontend/src/styles.css` | React dashboard design system and responsive rules |
-| `static/live/*` | Vite production build served at `/live/` |
+| `../frontend/public/*.html` | Original pages (login, dashboard, map, gate, notifications, admin, super-admin) |
+| `../frontend/src/App.jsx` | React dashboard composition, gate selector, auth state |
+| `../frontend/src/hooks.js` | Dashboard polling, countdown ticking, notification polling |
+| `../frontend/src/components/*` | Provider, gate, countdown, trains, demo routes, OSRM routes, map and notification panels |
+| `../frontend/src/styles.css` | React dashboard design system and responsive rules |
+| `../frontend/dist/live/*` | Vite production build deployed at `/live/` |
 
 ---
 
@@ -478,9 +479,10 @@ Start the app again. `DataInitializer` recreates the demo accounts and sample ro
 ### Build a runnable JAR
 
 ```powershell
-cd frontend; npm run build; cd ..
 .\mvnw.cmd clean package
 ```
+
+The frontend is built independently with `cd ../frontend && npm ci && npm run build`.
 
 The default profile connects to Aiven MySQL and requires secrets from the
 environment. No database, truststore or SUPER_ADMIN password is stored in source.
@@ -515,13 +517,14 @@ single-host nginx setup.
 
 ### Vercel + Render (Git-based deployment)
 
-Root `vercel.json` and root `render.yaml` make this repository ready for automatic
-Git deploys:
+The repository is split into two independently deployable projects:
 
-- Vercel publishes `src/main/resources/static` and rebuilds the React `/live/`
-  bundle with `npm ci && npm run build` from `frontend/`.
-- Render builds the root `Dockerfile` and runs the Spring Boot API. It uses the
-  injected `PORT` automatically; do **not** set `RAILSAFE_SERVER_ADDRESS` there.
+- Vercel uses `frontend/vercel.json`, sets **Root Directory** to `frontend`, runs
+  `npm ci && npm run build`, and publishes `frontend/dist` (pages at the root,
+  React dashboard at `/live/`).
+- Render uses the root `render.yaml` with `rootDir: backend`, building
+  `backend/Dockerfile`. It uses the injected `PORT` automatically; do **not** set
+  `RAILSAFE_SERVER_ADDRESS` there.
 - Vercel proxies `/api/*` to Render via the required `BACKEND_URL` environment
   variable, so cookies, CSRF and SSE remain same-origin. No CORS changes are needed.
 - `GET /api/health` is a public liveness probe used by Render's health check.
